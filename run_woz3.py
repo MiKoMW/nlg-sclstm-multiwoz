@@ -137,14 +137,73 @@ def evaluate(config, dataset, model, data_type, beam_search, beam_size, batch_si
 	print('redunt: {}, miss: {}, total: {}'.format(countAll['redunt'], countAll['miss'], countAll['total']), file=sys.stderr)
 	return total_loss
 
-
+# TODO: LOOK AT THIS!
 def train_epoch(config, dataset, model):
+
 	t = time.time()
 	model.train()
 
 	total_loss = 0
+
+
+	print("BATCH")
+	print(dataset.n_batch['train'])
+
+
+
 	for i in range(dataset.n_batch['train']):
 		input_var, label_var, feats_var, lengths, refs, featStrs, sv_indexes = dataset.next_batch()
+
+
+# dataset.n_batch['train']
+# 50
+# input_var
+# torch.Size([512, 39, 1345]) batch_size * max_input_len *
+# label_var
+# torch.Size([512, 39])
+# feats_var
+# torch.Size([512, 593])
+# 		refs
+# 		512 Ref sentences
+# featStrs
+# 512 features
+		# sv_indexes
+		# 512 idxes
+
+		# print("dataset.n_batch['train']",  file=sys.stderr)
+		# print(dataset.n_batch['train'], file=sys.stderr)
+		#
+		# print("input_var",  file=sys.stderr)
+		# print(input_var.size(), file=sys.stderr)
+		#
+		# print("label_var",  file=sys.stderr)
+		# print(label_var.size(), file=sys.stderr)
+		#
+		# print("feats_var",  file=sys.stderr)
+		# print(feats_var.size(), file=sys.stderr)
+		#
+		# print("lengths",  file=sys.stderr)
+		# print(lengths, file=sys.stderr)
+		# print(len(lengths), file=sys.stderr)
+		#
+		# print("refs",  file=sys.stderr)
+		# print(len(refs), file=sys.stderr)
+		# print(refs, file=sys.stderr)
+
+		# print("featStrs",  file=sys.stderr)
+		# print(len(featStrs), file=sys.stderr)
+		# print(featStrs, file=sys.stderr)
+		#
+		# print("sv_indexes",  file=sys.stderr)
+		# print(len(sv_indexes), file=sys.stderr)
+		# print(sv_indexes, file=sys.stderr)
+
+
+		# for (a,b) in zip(sv_indexes, featStrs):
+		# 	print(len(a),  file=sys.stderr)
+		# 	print(len(b.split("|")),  file=sys.stderr)
+		# 	assert len(a) == len(b.split("|"))
+
 
 		# feedforward and calculate loss
 		_ = model(input_var, dataset, feats_var)
@@ -155,6 +214,13 @@ def train_epoch(config, dataset, model):
 
 		# update model
 		model.update(config.getfloat('MODEL', 'clip'))
+
+
+
+
+
+
+
 
 	total_loss /= dataset.n_batch['train']
 
@@ -188,6 +254,7 @@ def read(config, args, mode):
 #	lr = config.getfloat('MODEL', 'learning_rate')
 	lr = args.lr
 	beam_size = args.beam_size
+
 
 	# get feat size
 	d_size = dataset.do_size + dataset.da_size + dataset.sv_size # len of 1-hot feat

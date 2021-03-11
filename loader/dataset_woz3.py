@@ -22,15 +22,27 @@ class DatasetWoz3(object):
 #		dataSplit_file = config['DATA']['dataSplit_file']
 		vocab_file = config['DATA']['vocab_file']
 		template_file = config['DATA']['template_file']
+
+
+		# TODO: Look at the code.
+
+		# print("feat_file",  file=sys.stderr)
+		# print(feat_file, file=sys.stderr)
+
+
+
+
 		self.template = template_file # for further scoring
 		
 		# hyper-params
 		self.batch_size = config.getint('DATA', 'batch_size')
 		self.percentage = percentage # percentage of data used
 		self.data   = {'train':[],'valid':[],'test':[]} 
-#		self.data   = {'train':[],'valid':[],'test_seen':[], 'test_unseen':[]} 
+#		self.data   = {'train':[],'valid':[],'test_seen':[], 'test_unseen':[]}
+
 		self.data_index  = {'train': 0, 'valid': 0, 'test': 0} # index for accessing data
 #		self.data_index  = {'train': 0, 'valid': 0, 'test_seen': 0, 'test_unseen': 0} # index for accessing data
+
 		self.n_batch = {}
 		self.shuffle = config.getboolean('DATA', 'shuffle')
 
