@@ -48,12 +48,17 @@ class DatasetWoz3(object):
 
 		# load vocab from file
 		self._loadVocab(vocab_file) # a list of vocab, andy
-		
+
+		# print("word2index",  file=sys.stderr)
+		# print(self.word2index,  file=sys.stderr)
+
 		# set input feature cardinality
+		# Songbo: Num of some features in the set?
 		self._setCardinality(template_file)
-		self.do_size = self.dfs[1] - self.dfs[0]
-		self.da_size = self.dfs[2] - self.dfs[1]
-		self.sv_size = self.dfs[3] - self.dfs[2]
+
+		self.do_size = self.dfs[1] - self.dfs[0] # domiain
+		self.da_size = self.dfs[2] - self.dfs[1] # dialogue act
+		self.sv_size = self.dfs[3] - self.dfs[2] # dialogue act and slot values
 		
 		# initialise dataset
 		self._setupData(text_file, feat_file, dataSplit_file)
@@ -68,6 +73,7 @@ class DatasetWoz3(object):
 
 
 	def next_batch(self, data_type='train'):
+
 		def indexes_from_sentence(sentence, add_eos=False):
 			indexes = [self.word2index[word] if word in self.word2index else self.word2index['UNK_token'] for word in sentence.split(' ')]
 			if add_eos:
@@ -89,6 +95,7 @@ class DatasetWoz3(object):
 				res.append(hot)
 			return res
 
+		# Counter for the data potions.
 		# reading a batch
 		start = self.data_index[data_type]
 		end = self.data_index[data_type] + self.batch_size
@@ -101,15 +108,40 @@ class DatasetWoz3(object):
 		sv_indexes = []
 
 		for dial_idx, turn_idx, text, meta in data:
+
+			# Songbo: Here is the place to use ori text than the delex text.
 			text_ori, text_delex = text['ori'], text['delex']
 			sentences.append(indexes_from_sentence(text_delex, add_eos=True))
 			refs.append(text_delex)
 
 			# get semantic feature
 			do_idx, da_idx, sv_idx, featStr = self.getFeatIdx(meta)
+
+			# print("do_idx",  file=sys.stderr)
+			# print(do_idx,  file=sys.stderr)
+			# print("da_idx",  file=sys.stderr)
+			# print(da_idx,  file=sys.stderr)
+			# print("sv_idx",  file=sys.stderr)
+			# print(sv_idx,  file=sys.stderr)
+			# print("featStr",  file=sys.stderr)
+			# print(featStr,  file=sys.stderr)
+
+			# do_idx
+			# [6, 1]
+			# da_idx
+			# [30, 5]
+			# sv_idx
+			# [552, 131, 127, 126, 130]
+			# featStr
+			# Booking - OfferBooked - Day - 1 | Booking - OfferBooked - Name - 1 | Booking - OfferBooked - People - 1 | Booking - OfferBooked - Ref - 1 | general - reqmore - none - none
+
 			do_cond = [1 if i in do_idx else 0 for i in range(self.do_size)] # domain condition
 			da_cond = [1 if i in da_idx else 0 for i in range(self.da_size)] # dial act condition
 			sv_cond = [1 if i in sv_idx else 0 for i in range(self.sv_size)] # slot/value condition
+
+
+
+
 			feats.append(do_cond + da_cond + sv_cond)
 			featStrs.append(featStr)
 
@@ -122,7 +154,16 @@ class DatasetWoz3(object):
 		# Zip into pairs, sort by length (descending), unzip
 		# Note: _words and _seqs should be sorted in the same order
 		seq_pairs = sorted(zip(sentences, refs, feats, featStrs, sv_indexes), key=lambda p: len(p[0]), reverse=True)
+
+
+
 		sentences, refs, feats, featStrs, sv_indexes = zip(*seq_pairs)
+
+		# print("sentences", file=sys.stderr)
+		# print(len(sentences), file=sys.stderr)
+		# print((sentences[0]), file=sys.stderr)
+		# print(list(map(lambda x : self.index2word[x], sentences[0])), file=sys.stderr)
+		#
 
 		# Pad with 0s to max length
 		lengths = [len(s) for s in sentences]
@@ -133,6 +174,11 @@ class DatasetWoz3(object):
 
 		input_var = Variable(torch.FloatTensor(sentences))
 		label_var = Variable(torch.LongTensor(sentences_padded))
+
+		# print("label_var", file=sys.stderr)
+		# print((label_var), file=sys.stderr)
+
+
 		feats_var = Variable(torch.FloatTensor(feats))
 #		do_label = Variable(torch.FloatTensor(do_label))
 #		da_label = Variable(torch.FloatTensor(da_label))
@@ -196,6 +242,11 @@ class DatasetWoz3(object):
 
 		with open(dataSplit_file) as f:
 			dataSet_split = json.load(f)
+
+
+		# print("dial2text",  file=sys.stderr)
+		# print(dial2text,  file=sys.stderr)
+
 
 		for data_type in ['train', 'valid', 'test']:
 #		for data_type in ['train', 'valid', 'test_seen', 'test_unseen']:

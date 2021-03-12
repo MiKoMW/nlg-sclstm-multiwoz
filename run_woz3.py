@@ -158,7 +158,7 @@ def train_epoch(config, dataset, model):
 # dataset.n_batch['train']
 # 50
 # input_var
-# torch.Size([512, 39, 1345]) batch_size * max_input_len *
+# torch.Size([512, 39, 1345]) batch_size * max_input_len * Vocab size
 # label_var
 # torch.Size([512, 39])
 # feats_var
@@ -173,8 +173,8 @@ def train_epoch(config, dataset, model):
 		# print("dataset.n_batch['train']",  file=sys.stderr)
 		# print(dataset.n_batch['train'], file=sys.stderr)
 		#
-		# print("input_var",  file=sys.stderr)
-		# print(input_var.size(), file=sys.stderr)
+			# print("input_var",  file=sys.stderr)
+			# print(input_var.size(), file=sys.stderr)
 		#
 		# print("label_var",  file=sys.stderr)
 		# print(label_var.size(), file=sys.stderr)
